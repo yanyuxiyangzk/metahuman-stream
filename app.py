@@ -27,6 +27,7 @@ import shutil
 import asyncio
 import edge_tts
 from typing import Iterator
+from utils import queue,wirte_fullbody_cache
 
 import requests
 
@@ -443,6 +444,28 @@ if __name__ == '__main__':
     print('start websocket server')
     #app.on_shutdown.append(on_shutdown)
     #app.router.add_post("/offer", offer)
+
+    while True:
+        t = time.time()
+        if not queue.empty():
+            start_num = queue.get()
+            img_num=6849#修改为自己的最大值
+            end = start_num+499
+            if start_num+499 >= img_num:
+                end=img_num
+            #数据拐点
+            data_add = 500
+            if (start_num / 500)% 2 == 0:
+                wirte_fullbody_cache('./data/fullbody/img/',start_num,end)
+            else:
+                wirte_fullbody_cache('./data/fullbody/img/',start_num,end,500)
+                
+        # else:
+        delay = 3 - (time.time() - t)
+        print(delay)
+        if delay > 0:
+            time.sleep(delay)
+
     server = pywsgi.WSGIServer(('0.0.0.0', 8000), app, handler_class=WebSocketHandler)
     server.serve_forever()
     

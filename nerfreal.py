@@ -14,6 +14,8 @@ import asyncio
 from rtmp_streaming import StreamerConfig, Streamer
 from av import AudioFrame, VideoFrame
 
+from utils import load_img_cache_json_que
+
 class NeRFReal:
     def __init__(self, opt, trainer, data_loader, debug=True):
         self.opt = opt # shared with the trainer's opt to support in-place modification of rendering parameters.
@@ -26,6 +28,7 @@ class NeRFReal:
         self.trainer = trainer
         self.data_loader = data_loader
 
+        self.lun_num = 0
         # use dataloader's bg
         bg_img = data_loader._data.bg_img #.view(1, -1, 3)
         if self.H != bg_img.shape[0] or self.W != bg_img.shape[1]:
@@ -150,8 +153,38 @@ class NeRFReal:
                     asyncio.run_coroutine_threadsafe(video_track._queue.put(new_frame), loop)
             else: #fullbody human
                 #print("frame index:",data['index'])
-                image_fullbody = cv2.imread(os.path.join(self.opt.fullbody_img, str(data['index'][0])+'.jpg'))
-                image_fullbody = cv2.cvtColor(image_fullbody, cv2.COLOR_BGR2RGB)
+
+                data_index=data['index'][0]
+                # print("----------------data_index--------------"+str(data_index))
+                img_num=6849#这个数值要修改为自己的
+                #每页大小
+                page_size=1000
+                # #一共多少页
+                page_num = int(img_num/1000)+1
+                #数据拐点
+                data_add = 500
+                if data_index == img_num:
+                    self.lun_num += 1
+                if data_index == 0:
+                    self.lun_num = 0
+                
+                num = data_index
+                str_num = str(num)
+                start = num+data_add
+                pag_nu = num%page_size
+                #数据拐点推送数据page_num
+                if  num % data_add == 0 :
+                    if self.lun_num == 0 and num > 0 and start < img_num:
+                        image_fullbody = load_img_cache_json_que(pag_nu,start)
+                    elif self.lun_num == 2 and num > data_add and num < img_num :
+                        image_fullbody = load_img_cache_json_que(pag_nu,num-2*data_add)
+                    else:
+                        image_fullbody = load_img_cache_json_que(pag_nu)
+                else:
+                    image_fullbody = load_img_cache_json_que(pag_nu)
+
+                # image_fullbody = cv2.imread(os.path.join(self.opt.fullbody_img, str(data['index'][0])+'.jpg'))
+                # image_fullbody = cv2.cvtColor(image_fullbody, cv2.COLOR_BGR2RGB)
                 start_x = self.opt.fullbody_offset_x  # 合并后小图片的起始x坐标
                 start_y = self.opt.fullbody_offset_y  # 合并后小图片的起始y坐标
                 image_fullbody[start_y:start_y+image.shape[0], start_x:start_x+image.shape[1]] = image

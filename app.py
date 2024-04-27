@@ -27,7 +27,7 @@ import shutil
 import asyncio
 import edge_tts
 from typing import Iterator
-from utils import queue,wirte_fullbody_cache,load_head_cache
+from utils import queue,wirte_fullbody_cache,load_img_cache
 
 import requests
 
@@ -249,7 +249,7 @@ async def on_shutdown(app):
 
 if __name__ == '__main__':
 
-    load_head_cache('./data/head_xiaoxiao/',0,999)
+    load_img_cache('./data/fullbody/img/',0,999)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--pose', type=str, default="data/data_kf.json", help="transforms.json, pose source")

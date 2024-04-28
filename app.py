@@ -249,7 +249,7 @@ async def on_shutdown(app):
 
 if __name__ == '__main__':
 
-    load_img_cache('./data/fullbody/img/',0,999)
+    wirte_fullbody_cache('./data/fullbody/img/',0,999)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--pose', type=str, default="data/data_kf.json", help="transforms.json, pose source")

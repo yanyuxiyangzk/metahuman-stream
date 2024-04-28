@@ -27,7 +27,7 @@ import shutil
 import asyncio
 import edge_tts
 from typing import Iterator
-from utils import queue,wirte_fullbody_cache,load_img_cache
+from utils import queue,wirte_fullbody_cache
 
 import requests
 
